@@ -1,6 +1,6 @@
 /*  SPANISH ________________________________________________________
  *  arcade.c - Driver usando el puerto paralelo para Maquinas Arcade
- *  Por David Colmenero AKA D_Skywalk <dantoine@gmail.com>
+ *  Por David Colmenero AKA D_Skywalk <dskywalk@gmail.com>
  *
  *  Basado en gamecon.c
  *   (autores ver abajo)
@@ -8,7 +8,7 @@
  *  ENGLISH _________________________________________________________
  *
  *  arcade.c - Driver for Arcade Cabinets using paralel port
- *  By David Colmenero AKA D_Skywalk <dantoine@gmail.com>
+ *  By David Colmenero AKA D_Skywalk <dskywalk@gmail.com>
  *
  *  Based on gamecon.c
  *  GAMECON credits:
@@ -22,7 +22,7 @@
  *
  *
  *
- *  OpenPPJoy - Copyright (c) 2006
+ *  OpenPPJoy - Copyright (c) 2006 - 2010
  *              David Colmenero Jimenez
  *  Version 0.4u
  */
