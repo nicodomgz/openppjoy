@@ -82,17 +82,12 @@ static struct gc_config gc[GC_MAX_PORTS] __initdata;
 module_param_array_named(map, gc[0].args, int, &gc[0].nargs, 0);
 MODULE_PARM_DESC(map, "Describes first set of devices (<parport#>,<pad1>,<pad2>,..<pad5>)");
 
-__obsolete_setup("gc=");
-
 #if GC_MAX_PORTS > 3
 
 	module_param_array_named(map2, gc[1].args, int, &gc[1].nargs, 0);
 	MODULE_PARM_DESC(map2, "Describes second set of devices");
 	module_param_array_named(map3, gc[2].args, int, &gc[2].nargs, 0);
 	MODULE_PARM_DESC(map3, "Describes third set of devices");
-
-	__obsolete_setup("gc_2=");
-	__obsolete_setup("gc_3=");
 
 #endif
 
@@ -375,7 +370,7 @@ static void arcade_timer(unsigned long private)
 
 static int arcade_open(struct input_dev *dev)
 {
-	struct gc *gc = dev->private;
+	struct gc *gc = input_get_drvdata(dev);
 	int err;
 
 	err = down_interruptible(&gc->sem);
@@ -395,7 +390,7 @@ static int arcade_open(struct input_dev *dev)
 
 static void arcade_close(struct input_dev *dev)
 {
-	struct gc *gc = dev->private;
+	struct gc *gc = input_get_drvdata(dev);
 
 	down(&gc->sem);
 	if (!--gc->used) {
@@ -434,7 +429,8 @@ static int __init arcade_setup_control(struct gc *gc, int idx, int pad_type)
 	input_dev->id.vendor = 0x0001;
 	input_dev->id.product = pad_type;
 	input_dev->id.version = 0x0100;
-	input_dev->private = gc;
+
+	input_set_drvdata(input_dev, gc);
 
 	input_dev->open = arcade_open;
 	input_dev->close = arcade_close;
