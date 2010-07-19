@@ -4,7 +4,7 @@
  #  Gracias a:
  #                          Vojtech Pavlik <vojtech@suse.cz>
  #                          Peter Nelson <rufus-kernel@hackish.org>
- #  						por su fantastico trabajo con "gamecon.c"
+ #  				por su fantastico trabajo con "gamecon.c"
  #
  #  Version 0.4 - 8 Marzo de 2006
  #		By D_Skywalk
@@ -43,18 +43,18 @@ Si habeis leido lo anterior, vereis que la implementacion de este driver en pane
 les de control arcade es muy simple, os dejo un esquema para un mando arcade:
 
                                        #JOY1
-                                      |--@---(2)
-                                      |--@---(3)
-                                      |--@---(4)
-                                      |--@---(5)
-L10-[Resistencia]---------------------|--@---(6)
-                                      |--@---(7)
-                                      |--@---(8)
-                                      |--@---(9)
-                                      |--@---(1)
-                                      |--@---(14)
-                                      |--@---(16)
-                                      |--@---(17)
+                                      |--@-D-(2)
+                                      |--@-D-(3)
+                                      |--@-D-(4)
+                                      |--@-D-(5)
+L10-----------------------------------|--@-D-(6)
+                                      |--@-D-(7)
+                                      |--@-D-(8)
+                                      |--@-D-(9)
+                                      |--@-D-(1)
+                                      |--@-D-(14)
+                                      |--@-D-(16)
+                                      |--@-D-(17)
 
 Leyenda:  @  - Botones, configurados en: "normalmente desconectados".
 		 (n) - Lineas de datos.
@@ -64,36 +64,37 @@ Y asi podriais seguir usando las siguientes lineas disponibles (11,12,13,15). Po
 si alguno aun no lo tiene claro, pongo un ejemplo final con 2 palancas:
 
                                        #JOY1
-                                      |--@---(2)
-                                      |--@---(3)
-                                      |--@---(4)
-                                      |--@---(5)
-L10-[Resistencia]---------------------|--@---(6)
-                                      |--@---(7)
-                                      |--@---(8)
-                                      |--@---(9)
-                                      |--@---(1)
-                                      |--@---(14)
-                                      |--@---(16)
-                                      |--@---(17)
+                                      |--@-D-(2)
+                                      |--@-D-(3)
+                                      |--@-D-(4)
+                                      |--@-D-(5)
+L10-----------------------------------|--@-D-(6)
+                                      |--@-D-(7)
+                                      |--@-D-(8)
+                                      |--@-D-(9)
+                                      |--@-D-(1)
+                                      |--@-D-(14)
+                                      |--@-D-(16)
+                                      |--@-D-(17)
 									  
                                        #JOY2
-                                      |--@---(2)
-                                      |--@---(3)
-                                      |--@---(4)
-                                      |--@---(5)
-L11-[Resistencia]---------------------|--@---(6)
-                                      |--@---(7)
-                                      |--@---(8)
-                                      |--@---(9)
-                                      |--@---(1)
-                                      |--@---(14)
-                                      |--@---(16)
-                                      |--@---(17)
+                                      |--@-D-(2)
+                                      |--@-D-(3)
+                                      |--@-D-(4)
+                                      |--@-D-(5)
+L11-----------------------------------|--@-D-(6)
+                                      |--@-D-(7)
+                                      |--@-D-(8)
+                                      |--@-D-(9)
+                                      |--@-D-(1)
+                                      |--@-D-(14)
+                                      |--@-D-(16)
+                                      |--@-D-(17)
 
 Leyenda:  @  - Botones, configurados en: "normalmente desconectados".
 		 (n) - Lineas de datos.
 		 lnn - Lineas de lectura.
+		  D  - DIODO
 
 En total podriais tener 5 palancas de 8 botones o 3 palancas y las dos configura-
 ciones de teclado basicas, etc... imaginacion al poder! xD
@@ -105,20 +106,20 @@ ciones de teclado basicas, etc... imaginacion al poder! xD
 (1) JOYSTICK: 2 ejes y 8 botones.
 
     TECLADO:
-	(2) KEY1 - 	CURSOR_UP
+	(2) KEY1 - 		CURSOR_UP
 		 		CURSOR_DOWN
 				CURSOR_LEFT
 				CURSOR_RIGHT
-				CURSOR_SPACE
 				LEFT_CONTROL
 				LEFT_SHIFT
 				LEFT_ALT
-				ESC
-				ENTER
+				T
+				Y
+				U
 				[5]
 				[1]
 				
-	(3)	KEY2 -	[W]
+	(3)	KEY2 -		[W]
 				[S]
 				[A]
 				[D]
@@ -131,6 +132,18 @@ ciones de teclado basicas, etc... imaginacion al poder! xD
 				[6]
 				[2]
 
+	(4)	KEY3 -		[N]
+				[M]
+				[P]
+				[ENTER]
+				[ESC]
+				[TAB]
+				[ESPACIO]
+				[º]
+				[3]
+				[4]
+				[7]
+				[8]
 
 
 ----------------------------------
@@ -144,6 +157,12 @@ usando actualmente por ejemplo en debian/ubuntu seria:
 
 Una vez instalados las cabeceras (o mismo source completo si lo deseas), hacemos:
 # make 
+Y si todo fue bien, para que instale el driver
+# make modules_install
+
+ATENCION SI TU KERNEL ES UNA VERSION DIFERENTE A LA 2.6.15
+COMPRUEBA LA CARPETA OTHERS PARA USAR LA VERSION CORREGIDA
+- para usarlos simplemente sobrescribe arcade.c original -
 
 Si todo ha terminado bien, tendriamos que tener un arcade.ko en el directorio 
 donde compilaste el modulo. Ahora vamos a explicar como "map=" configura el dri-
@@ -161,17 +180,17 @@ Unos ejemplos finales, teniendo en cuenta que "insmod" es para cargar el modulo
 y que "arcade.ko" seria el modulo (si aun teneis dudas, buscad por ahi tutoriales
 que sobre estos temas hay muchos!! :P
 
-# insmod arcade.ko map=0,1 
+# modprobe arcade map=0,1 
 
 Y con esto tendriamos una palanca de 8 botones que lee la linea 10...
 
 Si hubieramos hecho:
-# insmod arcade.ko map=0,1,1,1,1,1
+# modprobe arcade map=0,1,1,1,1,1
 
 Tendriamos 5 palancas de 4 botones que leen las lineas: 10,11,12,13,15 :)
 
 Por ultimo si hacemos:
-# insmod arcade.ko map=0,1,1,1,1,3
+# modprobe arcade map=0,1,1,1,1,3
 
 Facilmente podemos conseguir 4 de 8 botoncitos y una configuracion basica de te-
 clado ;)
