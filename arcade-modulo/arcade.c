@@ -198,7 +198,7 @@ static void arcade_control_process_packet(struct gc *gc)
 
         if (s & (gc->pads[GC_ARCADE] )) { //check connected pads
             input_report_abs(dev, ABS_X,  !(s & data[2]) - !(s & data[3])); //left or right
-            input_report_abs(dev, ABS_Y,  !(s & data[0]) - !(s & data[1])); //up o down
+            input_report_abs(dev, ABS_Y,  !(s & data[0]) - !(s & data[1])); //up or down
             input_report_key(dev, BTN_0, s & data[4]); //button 1
             input_report_key(dev, BTN_1, s & data[5]); //button 2
             input_report_key(dev, BTN_2, s & data[6]); //button 3
@@ -247,7 +247,7 @@ static void arcade_keyboard1_process_packet(struct gc *gc)
             //___________ USING CONTROL LINE ___________
             input_report_key(dev, KEY_Y, s & data[8]); //btn 5
             input_report_key(dev, KEY_U, s & data[9]); //btn 6
-            input_report_key(dev, KEY_5, s & data[10]); //coin 1
+            input_report_key(dev, KEY_5, s & data[10]); //COIN 1
             input_report_key(dev, KEY_1, s & data[11]);  //1P
         }
 
@@ -312,9 +312,9 @@ static void arcade_keyboard3_process_packet(struct gc *gc)
         if (!dev)
             continue;
 
-        s = gc_status_bit[i]; // set bit to find
+        s = gc_status_bit[i]; //set bit to find
 
-        if (s & (gc->pads[GC_KEY2] )) { //comprueba si el pad esta cargado
+        if (s & (gc->pads[GC_KEY2] )) { //check connected pads
             input_report_key(dev, KEY_N, s & data[0]); //extra 1
             input_report_key(dev, KEY_M, s & data[1]); //extra 2
             input_report_key(dev, KEY_P, s & data[2]); //pause
