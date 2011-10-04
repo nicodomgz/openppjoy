@@ -24,7 +24,7 @@
  *
  *  OpenPPJoy - Copyright (c) 2006 - 2010
  *              David Colmenero Jimenez
- *  Version 0.4u
+ *  Version 0.4z
  */
  
 /*
@@ -49,6 +49,7 @@
 /*
  * Changelog - OpenPPJoy
  *
+ * 0.4z - add 2.6.38 kernel required changes and mame keys, thx VeS.
  * 0.4u - add 2.6.32 kernel required changes, thx Pakito.
  * 0.4a - add 2.6.15 kernel required changes & more extra keys.
  * 0.4  - First public version.
@@ -111,8 +112,8 @@ struct gc {
     struct timer_list timer;
     unsigned char pads[GC_MAX +1];
     int used;
-    struct semaphore sem;
     char phys[GC_MAX_DEVICES][32];
+    struct mutex mutex;
 };
 
 static struct gc *gc_base[GC_MAX_PORTS];
@@ -241,12 +242,12 @@ static void arcade_keyboard1_process_packet(struct gc *gc)
             input_report_key(dev, KEY_LEFT, s & data[2]); //lf
             input_report_key(dev, KEY_RIGHT, s & data[3]); //rg
             input_report_key(dev, KEY_LEFTCTRL, s & data[4]); //btn 1
-            input_report_key(dev, KEY_LEFTSHIFT, s & data[5]); //btn 2
-            input_report_key(dev, KEY_LEFTALT, s & data[6]); //btn 3
-            input_report_key(dev, KEY_T, s & data[7]); //btn 4
+            input_report_key(dev, KEY_LEFTALT, s & data[5]); //btn 2
+            input_report_key(dev, KEY_SPACE, s & data[6]); //btn 3
+            input_report_key(dev, KEY_LEFTSHIFT, s & data[7]); //btn 4
             //___________ USING CONTROL LINE ___________
-            input_report_key(dev, KEY_Y, s & data[8]); //btn 5
-            input_report_key(dev, KEY_U, s & data[9]); //btn 6
+            input_report_key(dev, KEY_Z, s & data[8]); //btn 5
+            input_report_key(dev, KEY_X, s & data[9]); //btn 6
             input_report_key(dev, KEY_5, s & data[10]); //COIN 1
             input_report_key(dev, KEY_1, s & data[11]);  //1P
         }
@@ -275,17 +276,17 @@ static void arcade_keyboard2_process_packet(struct gc *gc)
         s = gc_status_bit[i]; //check bit to find
 
         if (s & (gc->pads[GC_KEY2] )) { //check connected pads
-            input_report_key(dev, KEY_W, s & data[0]); //up
-            input_report_key(dev, KEY_S, s & data[1]); //down
-            input_report_key(dev, KEY_A, s & data[2]); //lf
-            input_report_key(dev, KEY_D, s & data[3]); //rg
-            input_report_key(dev, KEY_Q, s & data[4]); //btn 1
-            input_report_key(dev, KEY_E, s & data[5]); //btn 2
-            input_report_key(dev, KEY_Z, s & data[6]); //btn 3
-            input_report_key(dev, KEY_X, s & data[7]); //btn 4
+            input_report_key(dev, KEY_R, s & data[0]); //up
+            input_report_key(dev, KEY_F, s & data[1]); //down
+            input_report_key(dev, KEY_D, s & data[2]); //lf
+            input_report_key(dev, KEY_G, s & data[3]); //rg
+            input_report_key(dev, KEY_A, s & data[4]); //btn 1
+            input_report_key(dev, KEY_S, s & data[5]); //btn 2
+            input_report_key(dev, KEY_Q, s & data[6]); //btn 3
+            input_report_key(dev, KEY_W, s & data[7]); //btn 4
             //___________ USING CONTROL LINE ___________
-            input_report_key(dev, KEY_C, s & data[8]); //btn 5
-            input_report_key(dev, KEY_V, s & data[9]); //btn 6
+            input_report_key(dev, KEY_I, s & data[8]); //btn 5
+            input_report_key(dev, KEY_K, s & data[9]); //btn 6
             input_report_key(dev, KEY_6, s & data[10]); //COIN 2
             input_report_key(dev, KEY_2, s & data[11]);  //2P
 
@@ -318,10 +319,10 @@ static void arcade_keyboard3_process_packet(struct gc *gc)
             input_report_key(dev, KEY_N, s & data[0]); //extra 1
             input_report_key(dev, KEY_M, s & data[1]); //extra 2
             input_report_key(dev, KEY_P, s & data[2]); //pause
-            input_report_key(dev, KEY_ENTER, s & data[3]);
-            input_report_key(dev, KEY_ESC, s & data[4]);
-            input_report_key(dev, KEY_TAB, s & data[5]);
-            input_report_key(dev, KEY_SPACE, s & data[6]);
+            input_report_key(dev, KEY_L, s & data[3]);
+            input_report_key(dev, KEY_ENTER, s & data[4]);
+            input_report_key(dev, KEY_ESC, s & data[5]);
+            input_report_key(dev, KEY_TAB, s & data[6]);
             input_report_key(dev, KEY_GRAVE, s & data[7]); //º
             //___________ USING CONTROL LINE ___________
             input_report_key(dev, KEY_3, s & data[8]); //3P
@@ -371,7 +372,7 @@ static int arcade_open(struct input_dev *dev)
     struct gc *gc = input_get_drvdata(dev);
     int err;
 
-    err = down_interruptible(&gc->sem);
+    err = mutex_lock_interruptible(&gc->mutex);
 
     if (err)
         return err;
@@ -382,7 +383,7 @@ static int arcade_open(struct input_dev *dev)
         mod_timer(&gc->timer, jiffies + GC_REFRESH_TIME);
     }
 
-    up(&gc->sem);
+    mutex_unlock(&gc->mutex);
     return 0;
 }
 
@@ -390,14 +391,14 @@ static void arcade_close(struct input_dev *dev)
 {
     struct gc *gc = input_get_drvdata(dev);
 
-    down(&gc->sem);
+    mutex_lock(&gc->mutex);
     if (!--gc->used) {
         del_timer(&gc->timer);
         parport_write_control(gc->pd->port, 0x00);
         parport_release(gc->pd);
     }
 
-    up(&gc->sem);
+    mutex_unlock(&gc->mutex);
 }
 
 
@@ -462,26 +463,26 @@ static int __init arcade_setup_control(struct gc *gc, int idx, int pad_type)
             set_bit(KEY_LEFT,  input_dev->keybit);
             set_bit(KEY_RIGHT, input_dev->keybit);
             set_bit(KEY_LEFTCTRL,  input_dev->keybit);
-            set_bit(KEY_LEFTSHIFT, input_dev->keybit);
             set_bit(KEY_LEFTALT,   input_dev->keybit);
-            set_bit(KEY_T, input_dev->keybit);
-            set_bit(KEY_Y, input_dev->keybit);
-            set_bit(KEY_U, input_dev->keybit);
+            set_bit(KEY_SPACE, input_dev->keybit);
+            set_bit(KEY_LEFTSHIFT, input_dev->keybit);   
+            set_bit(KEY_Z, input_dev->keybit);
+            set_bit(KEY_X, input_dev->keybit);
             set_bit(KEY_5, input_dev->keybit);
             set_bit(KEY_1, input_dev->keybit);
             break;
 
         case GC_KEY2:
-            set_bit(KEY_W, input_dev->keybit); //configure more keys...
-            set_bit(KEY_S, input_dev->keybit);
-            set_bit(KEY_A, input_dev->keybit);
+            set_bit(KEY_R, input_dev->keybit); //configure more keys...
+            set_bit(KEY_F, input_dev->keybit);
             set_bit(KEY_D, input_dev->keybit);
+            set_bit(KEY_G, input_dev->keybit);
+            set_bit(KEY_A, input_dev->keybit);
+            set_bit(KEY_S, input_dev->keybit);
             set_bit(KEY_Q, input_dev->keybit);
-            set_bit(KEY_E, input_dev->keybit);
-            set_bit(KEY_Z, input_dev->keybit);
-            set_bit(KEY_X, input_dev->keybit);
-            set_bit(KEY_C, input_dev->keybit);
-            set_bit(KEY_V, input_dev->keybit);
+            set_bit(KEY_W, input_dev->keybit);
+            set_bit(KEY_I, input_dev->keybit);
+            set_bit(KEY_K, input_dev->keybit);
             set_bit(KEY_6, input_dev->keybit);
             set_bit(KEY_2, input_dev->keybit);
             break;
@@ -490,10 +491,10 @@ static int __init arcade_setup_control(struct gc *gc, int idx, int pad_type)
             set_bit(KEY_N, input_dev->keybit); //configure mooore keys...
             set_bit(KEY_M, input_dev->keybit);
             set_bit(KEY_P, input_dev->keybit);
+            set_bit(KEY_L, input_dev->keybit);
             set_bit(KEY_ENTER, input_dev->keybit);
             set_bit(KEY_ESC,   input_dev->keybit);
             set_bit(KEY_TAB,   input_dev->keybit);
-            set_bit(KEY_SPACE, input_dev->keybit);
             set_bit(KEY_GRAVE, input_dev->keybit); //º
             set_bit(KEY_3, input_dev->keybit);
             set_bit(KEY_4, input_dev->keybit);
@@ -536,7 +537,7 @@ static struct gc __init *arcade_probe(int parport, int *pads, int n_pads)
         goto err_unreg_pardev;
     }
 
-    init_MUTEX(&gc->sem);
+    mutex_init(&gc->mutex);
     gc->pd = pd;
     init_timer(&gc->timer);
     gc->timer.data = (long) gc;

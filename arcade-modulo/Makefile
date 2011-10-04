@@ -4,9 +4,9 @@
 #       distinguir si kernel > 2.6.17, para usar arcade-new.c
 
 # FORZAR VERSION
-#VER	?= 2.6.15-28-386
+VER	?= 2.6.38.2-ages
 
-VER	?= $(shell uname -r)
+#VER	?= $(shell uname -r)
 obj-m	:= arcade.o
 TARGET	:= arcade
 MODNAME	:= arcade.ko
