@@ -1,12 +1,10 @@
-#MAKEFILE KERNEL SKY
+# SIMPLE MAKEFILE KERNEL - SKY
 # v2
-# TODO: distinguir si kernel < 2.6.15, para usar arcade-old.c
-#       distinguir si kernel > 2.6.17, para usar arcade-new.c
 
-# FORZAR VERSION
-VER	?= 2.6.38.2-ages
+# FORCE VERSION
+#VER	?= 2.6.38.2-386
 
-#VER	?= $(shell uname -r)
+VER	?= $(shell uname -r)
 obj-m	:= arcade.o
 TARGET	:= arcade
 MODNAME	:= arcade.ko
