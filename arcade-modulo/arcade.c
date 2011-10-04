@@ -600,7 +600,7 @@ static int __init arcade_init(void)
     int have_dev = 0;
     int err = 0;
 
-    printk(KERN_INFO "arcade.c: Initializing Arcade module - v0.4u\n");
+    printk(KERN_INFO "arcade.c: Initializing Arcade module - v0.4z\n");
 
     for (i = 0; i < GC_MAX_PORTS; i++) {
         if (gc[i].nargs == 0 || gc[i].args[0] < 0)
