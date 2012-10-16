@@ -315,7 +315,7 @@ static void arcade_keyboard3_process_packet(struct gc *gc)
 
         s = gc_status_bit[i]; //set bit to find
 
-        if (s & (gc->pads[GC_KEY2] )) { //check connected pads
+        if (s & (gc->pads[GC_KEY3] )) { //check connected pads
             input_report_key(dev, KEY_N, s & data[0]); //extra 1
             input_report_key(dev, KEY_M, s & data[1]); //extra 2
             input_report_key(dev, KEY_P, s & data[2]); //pause
